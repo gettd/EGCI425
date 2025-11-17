@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.9.003">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.9.003" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="retrieve" compatibility="9.9.003" expanded="true" height="68" name="Retrieve Deals" width="90" x="45" y="34">
+        <parameter key="repository_entry" value="//Samples/data/Deals"/>
+      </operator>
+      <operator activated="true" class="stacking" compatibility="9.9.003" expanded="true" height="68" name="Stacking" width="90" x="179" y="34">
+        <parameter key="keep_all_attributes" value="true"/>
+        <parameter key="keep_confidences" value="true"/>
+        <process expanded="true">
+          <operator activated="true" class="naive_bayes" compatibility="9.9.003" expanded="true" height="82" name="Naive Bayes" width="90" x="45" y="34">
+            <parameter key="laplace_correction" value="true"/>
+          </operator>
+          <operator activated="true" class="concurrency:parallel_decision_tree" compatibility="9.9.003" expanded="true" height="103" name="Decision Tree" width="90" x="45" y="136">
+            <parameter key="criterion" value="gain_ratio"/>
+            <parameter key="maximal_depth" value="10"/>
+            <parameter key="apply_pruning" value="true"/>
+            <parameter key="confidence" value="0.1"/>
+            <parameter key="apply_prepruning" value="true"/>
+            <parameter key="minimal_gain" value="0.01"/>
+            <parameter key="minimal_leaf_size" value="2"/>
+            <parameter key="minimal_size_for_split" value="4"/>
+            <parameter key="number_of_prepruning_alternatives" value="3"/>
+          </operator>
+          <connect from_port="training set 1" to_op="Naive Bayes" to_port="training set"/>
+          <connect from_port="training set 2" to_op="Decision Tree" to_port="training set"/>
+          <connect from_op="Naive Bayes" from_port="model" to_port="base model 1"/>
+          <connect from_op="Decision Tree" from_port="model" to_port="base model 2"/>
+          <portSpacing port="source_training set 1" spacing="0"/>
+          <portSpacing port="source_training set 2" spacing="63"/>
+          <portSpacing port="source_training set 3" spacing="0"/>
+          <portSpacing port="sink_base model 1" spacing="0"/>
+          <portSpacing port="sink_base model 2" spacing="63"/>
+          <portSpacing port="sink_base model 3" spacing="0"/>
+        </process>
+        <process expanded="true">
+          <operator activated="true" breakpoints="before" class="rule_induction" compatibility="9.9.003" expanded="true" height="82" name="Rule Induction" width="90" x="45" y="34">
+            <parameter key="criterion" value="accuracy"/>
+            <parameter key="sample_ratio" value="0.9"/>
+            <parameter key="pureness" value="0.9"/>
+            <parameter key="minimal_prune_benefit" value="0.25"/>
+            <parameter key="use_local_random_seed" value="false"/>
+            <parameter key="local_random_seed" value="1992"/>
+          </operator>
+          <connect from_port="stacking examples" to_op="Rule Induction" to_port="training set"/>
+          <connect from_op="Rule Induction" from_port="model" to_port="stacking model"/>
+          <portSpacing port="source_stacking examples" spacing="0"/>
+          <portSpacing port="sink_stacking model" spacing="0"/>
+          <description align="left" color="orange" colored="true" height="89" resized="true" width="208" x="10" y="125">Training data for meta classifier contain attributes that are prediction results from base classifiers</description>
+        </process>
+      </operator>
+      <operator activated="true" class="retrieve" compatibility="9.9.003" expanded="true" height="68" name="Retrieve Deals-Testset" width="90" x="45" y="136">
+        <parameter key="repository_entry" value="//Samples/data/Deals-Testset"/>
+      </operator>
+      <operator activated="true" class="apply_model" compatibility="9.9.003" expanded="true" height="82" name="Apply Stacking" width="90" x="246" y="136">
+        <list key="application_parameters"/>
+        <parameter key="create_view" value="false"/>
+      </operator>
+      <operator activated="true" class="performance" compatibility="9.9.003" expanded="true" height="82" name="Performance Stacking" width="90" x="380" y="85">
+        <parameter key="use_example_weights" value="true"/>
+      </operator>
+      <connect from_op="Retrieve Deals" from_port="output" to_op="Stacking" to_port="training set"/>
+      <connect from_op="Stacking" from_port="model" to_op="Apply Stacking" to_port="model"/>
+      <connect from_op="Retrieve Deals-Testset" from_port="output" to_op="Apply Stacking" to_port="unlabelled data"/>
+      <connect from_op="Apply Stacking" from_port="labelled data" to_op="Performance Stacking" to_port="labelled data"/>
+      <connect from_op="Apply Stacking" from_port="model" to_port="result 2"/>
+      <connect from_op="Performance Stacking" from_port="performance" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="42"/>
+      <portSpacing port="sink_result 2" spacing="42"/>
+      <portSpacing port="sink_result 3" spacing="0"/>
+      <description align="left" color="orange" colored="true" height="67" resized="true" width="188" x="286" y="10">Can choose whether to also use prediction confidence as attributes in meta training</description>
+    </process>
+  </operator>
+</process>
