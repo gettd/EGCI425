@@ -15,7 +15,7 @@
       <operator activated="true" class="retrieve" compatibility="12.0.001" expanded="true" height="68" name="Retrieve" width="90" x="45" y="34">
         <parameter key="repository_entry" value="data/cpu"/>
       </operator>
-      <operator activated="true" class="split_validation" compatibility="10.0.000" expanded="true" height="124" name="Split Validation" width="90" x="380" y="34">
+      <operator activated="true" class="split_validation" compatibility="10.0.000" expanded="true" height="124" name="Split Validation" width="90" x="313" y="34">
         <parameter key="create_complete_model" value="false"/>
         <parameter key="split" value="relative"/>
         <parameter key="split_ratio" value="0.7"/>
@@ -37,7 +37,7 @@
             <parameter key="number_of_prepruning_alternatives" value="3"/>
           </operator>
           <operator activated="true" class="store" compatibility="12.0.001" expanded="true" height="68" name="Store weights" width="90" x="246" y="85">
-            <parameter key="repository_entry" value="results/Ex 8.1 (weights)"/>
+            <parameter key="repository_entry" value="results/DT(weights)"/>
           </operator>
           <connect from_port="training" to_op="Decision Tree" to_port="training set"/>
           <connect from_op="Decision Tree" from_port="model" to_port="model"/>
@@ -69,7 +69,7 @@
             <parameter key="use_example_weights" value="true"/>
           </operator>
           <operator activated="true" class="store" compatibility="12.0.001" expanded="true" height="68" name="Store results" width="90" x="313" y="85">
-            <parameter key="repository_entry" value="results/Ex 8.1 (results)"/>
+            <parameter key="repository_entry" value="results/DT(results)"/>
           </operator>
           <connect from_port="model" to_op="Apply Model" to_port="model"/>
           <connect from_port="test set" to_op="Apply Model" to_port="unlabelled data"/>
