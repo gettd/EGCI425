@@ -15,81 +15,173 @@
       <operator activated="true" class="retrieve" compatibility="12.0.001" expanded="true" height="68" name="Retrieve" width="90" x="45" y="34">
         <parameter key="repository_entry" value="data/cpu"/>
       </operator>
-      <operator activated="true" class="split_validation" compatibility="10.0.000" expanded="true" height="124" name="Split Validation" width="90" x="246" y="34">
-        <parameter key="create_complete_model" value="false"/>
-        <parameter key="split" value="relative"/>
-        <parameter key="split_ratio" value="0.7"/>
-        <parameter key="training_set_size" value="100"/>
-        <parameter key="test_set_size" value="-1"/>
-        <parameter key="sampling_type" value="automatic"/>
-        <parameter key="use_local_random_seed" value="false"/>
-        <parameter key="local_random_seed" value="1992"/>
+      <operator activated="true" class="select_subprocess" compatibility="12.0.001" expanded="true" height="103" name="Select Subprocess" width="90" x="246" y="34">
+        <parameter key="select_which" value="2"/>
         <process expanded="true">
-          <operator activated="true" class="linear_regression" compatibility="12.0.001" expanded="true" height="103" name="Linear Regression" width="90" x="45" y="34">
-            <parameter key="feature_selection" value="T-Test"/>
-            <parameter key="alpha" value="0.05"/>
-            <parameter key="max_iterations" value="10"/>
-            <parameter key="forward_alpha" value="0.05"/>
-            <parameter key="backward_alpha" value="0.05"/>
-            <parameter key="eliminate_colinear_features" value="true"/>
-            <parameter key="min_tolerance" value="0.2"/>
-            <parameter key="use_bias" value="true"/>
-            <parameter key="ridge" value="1.0E-8"/>
+          <operator activated="true" class="split_validation" compatibility="10.0.000" expanded="true" height="124" name="Split Validation" width="90" x="179" y="34">
+            <parameter key="create_complete_model" value="false"/>
+            <parameter key="split" value="relative"/>
+            <parameter key="split_ratio" value="0.7"/>
+            <parameter key="training_set_size" value="100"/>
+            <parameter key="test_set_size" value="-1"/>
+            <parameter key="sampling_type" value="automatic"/>
+            <parameter key="use_local_random_seed" value="false"/>
+            <parameter key="local_random_seed" value="1992"/>
+            <process expanded="true">
+              <operator activated="true" class="linear_regression" compatibility="12.0.001" expanded="true" height="103" name="Linear Regression" width="90" x="45" y="34">
+                <parameter key="feature_selection" value="none"/>
+                <parameter key="alpha" value="0.05"/>
+                <parameter key="max_iterations" value="10"/>
+                <parameter key="forward_alpha" value="0.05"/>
+                <parameter key="backward_alpha" value="0.05"/>
+                <parameter key="eliminate_colinear_features" value="false"/>
+                <parameter key="min_tolerance" value="0.2"/>
+                <parameter key="use_bias" value="true"/>
+                <parameter key="ridge" value="1.0E-8"/>
+              </operator>
+              <operator activated="true" class="store" compatibility="12.0.001" expanded="true" height="68" name="Store weights" width="90" x="179" y="85">
+                <parameter key="repository_entry" value="results/LR_no_featureElim(weights)"/>
+              </operator>
+              <connect from_port="training" to_op="Linear Regression" to_port="training set"/>
+              <connect from_op="Linear Regression" from_port="model" to_port="model"/>
+              <connect from_op="Linear Regression" from_port="weights" to_op="Store weights" to_port="input"/>
+              <portSpacing port="source_training" spacing="0"/>
+              <portSpacing port="sink_model" spacing="0"/>
+              <portSpacing port="sink_through 1" spacing="0"/>
+            </process>
+            <process expanded="true">
+              <operator activated="true" class="apply_model" compatibility="12.0.001" expanded="true" height="82" name="Apply Model" width="90" x="45" y="34">
+                <list key="application_parameters"/>
+              </operator>
+              <operator activated="true" class="performance_regression" compatibility="12.0.001" expanded="true" height="82" name="Performance Regression" width="90" x="179" y="34">
+                <parameter key="main_criterion" value="first"/>
+                <parameter key="root_mean_squared_error" value="true"/>
+                <parameter key="absolute_error" value="false"/>
+                <parameter key="relative_error" value="false"/>
+                <parameter key="relative_error_lenient" value="false"/>
+                <parameter key="relative_error_strict" value="false"/>
+                <parameter key="normalized_absolute_error" value="false"/>
+                <parameter key="root_relative_squared_error" value="true"/>
+                <parameter key="squared_error" value="false"/>
+                <parameter key="correlation" value="true"/>
+                <parameter key="squared_correlation" value="true"/>
+                <parameter key="prediction_average" value="false"/>
+                <parameter key="spearman_rho" value="false"/>
+                <parameter key="kendall_tau" value="false"/>
+                <parameter key="skip_undefined_labels" value="true"/>
+                <parameter key="use_example_weights" value="true"/>
+              </operator>
+              <operator activated="true" class="store" compatibility="12.0.001" expanded="true" height="68" name="Store results" width="90" x="313" y="85">
+                <parameter key="repository_entry" value="results/LR_no_featureElim(results)"/>
+              </operator>
+              <connect from_port="model" to_op="Apply Model" to_port="model"/>
+              <connect from_port="test set" to_op="Apply Model" to_port="unlabelled data"/>
+              <connect from_op="Apply Model" from_port="labelled data" to_op="Performance Regression" to_port="labelled data"/>
+              <connect from_op="Performance Regression" from_port="performance" to_port="averagable 1"/>
+              <connect from_op="Performance Regression" from_port="example set" to_op="Store results" to_port="input"/>
+              <portSpacing port="source_model" spacing="0"/>
+              <portSpacing port="source_test set" spacing="0"/>
+              <portSpacing port="source_through 1" spacing="0"/>
+              <portSpacing port="sink_averagable 1" spacing="0"/>
+              <portSpacing port="sink_averagable 2" spacing="0"/>
+            </process>
           </operator>
-          <operator activated="true" class="store" compatibility="12.0.001" expanded="true" height="68" name="Store weights" width="90" x="179" y="85">
-            <parameter key="repository_entry" value="results/Ex 8.1 (weights)"/>
-          </operator>
-          <connect from_port="training" to_op="Linear Regression" to_port="training set"/>
-          <connect from_op="Linear Regression" from_port="model" to_port="model"/>
-          <connect from_op="Linear Regression" from_port="weights" to_op="Store weights" to_port="input"/>
-          <portSpacing port="source_training" spacing="0"/>
-          <portSpacing port="sink_model" spacing="0"/>
-          <portSpacing port="sink_through 1" spacing="0"/>
+          <connect from_port="input 1" to_op="Split Validation" to_port="training"/>
+          <connect from_op="Split Validation" from_port="model" to_port="output 1"/>
+          <connect from_op="Split Validation" from_port="averagable 1" to_port="output 2"/>
+          <portSpacing port="source_input 1" spacing="0"/>
+          <portSpacing port="source_input 2" spacing="0"/>
+          <portSpacing port="sink_output 1" spacing="0"/>
+          <portSpacing port="sink_output 2" spacing="0"/>
+          <portSpacing port="sink_output 3" spacing="0"/>
         </process>
         <process expanded="true">
-          <operator activated="true" class="apply_model" compatibility="12.0.001" expanded="true" height="82" name="Apply Model" width="90" x="45" y="34">
-            <list key="application_parameters"/>
+          <operator activated="true" class="split_validation" compatibility="10.0.000" expanded="true" height="124" name="Split Validation (2)" width="90" x="179" y="34">
+            <parameter key="create_complete_model" value="false"/>
+            <parameter key="split" value="relative"/>
+            <parameter key="split_ratio" value="0.7"/>
+            <parameter key="training_set_size" value="100"/>
+            <parameter key="test_set_size" value="-1"/>
+            <parameter key="sampling_type" value="automatic"/>
+            <parameter key="use_local_random_seed" value="false"/>
+            <parameter key="local_random_seed" value="1992"/>
+            <process expanded="true">
+              <operator activated="true" class="linear_regression" compatibility="12.0.001" expanded="true" height="103" name="Linear Regression (2)" width="90" x="45" y="34">
+                <parameter key="feature_selection" value="T-Test"/>
+                <parameter key="alpha" value="0.05"/>
+                <parameter key="max_iterations" value="10"/>
+                <parameter key="forward_alpha" value="0.05"/>
+                <parameter key="backward_alpha" value="0.05"/>
+                <parameter key="eliminate_colinear_features" value="true"/>
+                <parameter key="min_tolerance" value="0.2"/>
+                <parameter key="use_bias" value="true"/>
+                <parameter key="ridge" value="1.0E-8"/>
+              </operator>
+              <operator activated="true" class="store" compatibility="12.0.001" expanded="true" height="68" name="Store weights (2)" width="90" x="179" y="85">
+                <parameter key="repository_entry" value="results/LR_featureElim(weights)"/>
+              </operator>
+              <connect from_port="training" to_op="Linear Regression (2)" to_port="training set"/>
+              <connect from_op="Linear Regression (2)" from_port="model" to_port="model"/>
+              <connect from_op="Linear Regression (2)" from_port="weights" to_op="Store weights (2)" to_port="input"/>
+              <portSpacing port="source_training" spacing="0"/>
+              <portSpacing port="sink_model" spacing="0"/>
+              <portSpacing port="sink_through 1" spacing="0"/>
+            </process>
+            <process expanded="true">
+              <operator activated="true" class="apply_model" compatibility="12.0.001" expanded="true" height="82" name="Apply Model (2)" width="90" x="45" y="34">
+                <list key="application_parameters"/>
+              </operator>
+              <operator activated="true" class="performance_regression" compatibility="12.0.001" expanded="true" height="82" name="Performance Regression (2)" width="90" x="179" y="34">
+                <parameter key="main_criterion" value="first"/>
+                <parameter key="root_mean_squared_error" value="true"/>
+                <parameter key="absolute_error" value="false"/>
+                <parameter key="relative_error" value="false"/>
+                <parameter key="relative_error_lenient" value="false"/>
+                <parameter key="relative_error_strict" value="false"/>
+                <parameter key="normalized_absolute_error" value="false"/>
+                <parameter key="root_relative_squared_error" value="true"/>
+                <parameter key="squared_error" value="false"/>
+                <parameter key="correlation" value="true"/>
+                <parameter key="squared_correlation" value="true"/>
+                <parameter key="prediction_average" value="false"/>
+                <parameter key="spearman_rho" value="false"/>
+                <parameter key="kendall_tau" value="false"/>
+                <parameter key="skip_undefined_labels" value="true"/>
+                <parameter key="use_example_weights" value="true"/>
+              </operator>
+              <operator activated="true" class="store" compatibility="12.0.001" expanded="true" height="68" name="Store results (2)" width="90" x="313" y="85">
+                <parameter key="repository_entry" value="results/LR_featureElim(results)"/>
+              </operator>
+              <connect from_port="model" to_op="Apply Model (2)" to_port="model"/>
+              <connect from_port="test set" to_op="Apply Model (2)" to_port="unlabelled data"/>
+              <connect from_op="Apply Model (2)" from_port="labelled data" to_op="Performance Regression (2)" to_port="labelled data"/>
+              <connect from_op="Performance Regression (2)" from_port="performance" to_port="averagable 1"/>
+              <connect from_op="Performance Regression (2)" from_port="example set" to_op="Store results (2)" to_port="input"/>
+              <portSpacing port="source_model" spacing="0"/>
+              <portSpacing port="source_test set" spacing="0"/>
+              <portSpacing port="source_through 1" spacing="0"/>
+              <portSpacing port="sink_averagable 1" spacing="0"/>
+              <portSpacing port="sink_averagable 2" spacing="0"/>
+            </process>
           </operator>
-          <operator activated="true" class="performance_regression" compatibility="12.0.001" expanded="true" height="82" name="Performance Regression" width="90" x="179" y="34">
-            <parameter key="main_criterion" value="first"/>
-            <parameter key="root_mean_squared_error" value="true"/>
-            <parameter key="absolute_error" value="false"/>
-            <parameter key="relative_error" value="false"/>
-            <parameter key="relative_error_lenient" value="false"/>
-            <parameter key="relative_error_strict" value="false"/>
-            <parameter key="normalized_absolute_error" value="false"/>
-            <parameter key="root_relative_squared_error" value="true"/>
-            <parameter key="squared_error" value="false"/>
-            <parameter key="correlation" value="true"/>
-            <parameter key="squared_correlation" value="true"/>
-            <parameter key="prediction_average" value="false"/>
-            <parameter key="spearman_rho" value="false"/>
-            <parameter key="kendall_tau" value="false"/>
-            <parameter key="skip_undefined_labels" value="true"/>
-            <parameter key="use_example_weights" value="true"/>
-          </operator>
-          <operator activated="true" class="store" compatibility="12.0.001" expanded="true" height="68" name="Store results" width="90" x="313" y="85">
-            <parameter key="repository_entry" value="results/Ex 8.1 (results)"/>
-          </operator>
-          <connect from_port="model" to_op="Apply Model" to_port="model"/>
-          <connect from_port="test set" to_op="Apply Model" to_port="unlabelled data"/>
-          <connect from_op="Apply Model" from_port="labelled data" to_op="Performance Regression" to_port="labelled data"/>
-          <connect from_op="Performance Regression" from_port="performance" to_port="averagable 1"/>
-          <connect from_op="Performance Regression" from_port="example set" to_op="Store results" to_port="input"/>
-          <portSpacing port="source_model" spacing="0"/>
-          <portSpacing port="source_test set" spacing="0"/>
-          <portSpacing port="source_through 1" spacing="0"/>
-          <portSpacing port="sink_averagable 1" spacing="0"/>
-          <portSpacing port="sink_averagable 2" spacing="0"/>
+          <connect from_port="input 1" to_op="Split Validation (2)" to_port="training"/>
+          <connect from_op="Split Validation (2)" from_port="model" to_port="output 1"/>
+          <connect from_op="Split Validation (2)" from_port="training" to_port="output 2"/>
+          <portSpacing port="source_input 1" spacing="0"/>
+          <portSpacing port="source_input 2" spacing="0"/>
+          <portSpacing port="sink_output 1" spacing="0"/>
+          <portSpacing port="sink_output 2" spacing="0"/>
+          <portSpacing port="sink_output 3" spacing="0"/>
         </process>
       </operator>
-      <connect from_op="Retrieve" from_port="output" to_op="Split Validation" to_port="training"/>
-      <connect from_op="Split Validation" from_port="model" to_port="result 1"/>
-      <connect from_op="Split Validation" from_port="averagable 1" to_port="result 2"/>
+      <connect from_op="Retrieve" from_port="output" to_op="Select Subprocess" to_port="input 1"/>
+      <connect from_op="Select Subprocess" from_port="output 1" to_port="result 1"/>
+      <connect from_op="Select Subprocess" from_port="output 2" to_port="result 2"/>
       <portSpacing port="source_input 1" spacing="0"/>
       <portSpacing port="sink_result 1" spacing="0"/>
       <portSpacing port="sink_result 2" spacing="0"/>
       <portSpacing port="sink_result 3" spacing="0"/>
+      <description align="center" color="yellow" colored="false" height="105" resized="false" width="180" x="189" y="164">1 = no feature elim&lt;br/&gt;2 = feature elim</description>
     </process>
   </operator>
 </process>
